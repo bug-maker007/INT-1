@@ -1,0 +1,4 @@
+# AGGRESSIVE, HTTP, Suricata 8+ only (entropy keyword). Load with aggressive_http.rules.
+# Mythic C2 v3.4.36, HTTP C2 Profile, agent Medusa. Tested in Dalton on Suricata 7.0.14 and 8.0.7.
+
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"C2 Mythic possible message in HTTP GET query (URI entropy above 5.3 bits per byte, 3+ per 5 minutes)"; flow:established,to_server; http.method; content:"GET"; http.uri; bsize:>150; content:"?"; pcre:"/[?&][A-Za-z0-9_\-]{1,16}=[A-Za-z0-9_\-]{120,}(?:&|$)/"; entropy: value > 5.3; threshold:type both, track by_src, count 3, seconds 300; classtype:trojan-activity; sid:9200024; rev:3; metadata:created_at 2026_10_25, updated_at 2026_10_26, ruleset aggressive_http;)

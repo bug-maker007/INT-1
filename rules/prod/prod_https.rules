@@ -1,0 +1,5 @@
+# PROD, HTTPS without TLS inspection. Needs ja4-fingerprints: yes in suricata.yaml.
+# Mythic C2 v3.4.36, HTTP C2 Profile, agent Medusa. Tested in Dalton on Suricata 7.0.14 and 8.0.7.
+
+alert tls $EXTERNAL_NET any -> $HOME_NET any (msg:"C2 Mythic default self-signed TLS certificate (O=Mythic C2 in subject and issuer, TLS 1.2 and older)"; flow:established,to_client; tls.cert_subject; content:"O=Mythic"; fast_pattern; tls.cert_issuer; content:"O=Mythic"; threshold:type limit, track by_dst, count 1, seconds 300; classtype:trojan-activity; sid:9100007; rev:4; metadata:created_at 2026_10_25, updated_at 2026_10_26, ruleset prod_https;)
+alert tls $HOME_NET any -> $EXTERNAL_NET any (msg:"C2 Mythic Medusa HTTPS beaconing (15+ TLS sessions per minute to one host, client without ALPN)"; flow:established,to_server; ja4.hash; content:"t"; startswith; content:"00_"; offset:8; depth:3; fast_pattern; threshold:type both, track by_both, count 15, seconds 60; classtype:trojan-activity; sid:9100021; rev:3; metadata:created_at 2026_10_25, updated_at 2026_10_26, ruleset prod_https;)
